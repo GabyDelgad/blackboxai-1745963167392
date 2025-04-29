@@ -21,13 +21,13 @@ export class NewsPage implements OnInit {
     this.loading = true;
     this.errorMessage = null;
     try {
-      const proxyUrl = 'https://api.allorigins.win/get?url=';
+      const proxyUrl = 'https://api.allorigins.win/raw?url=';
       const feedUrl = encodeURIComponent('https://www.noaa.gov/news-release/rss.xml');
       const response = await fetch(proxyUrl + feedUrl);
       if (!response.ok) throw new Error('Erro ao buscar notícias');
-      const data = await response.json();
+      const text = await response.text();
       const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+      const xmlDoc = parser.parseFromString(text, "text/xml");
       const items = xmlDoc.querySelectorAll('item');
       if (items.length === 0) {
         this.newsItems = [];
