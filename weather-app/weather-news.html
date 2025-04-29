@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="transition-colors duration-500">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Notícias sobre o Clima</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      transition: background-color 0.5s, color 0.5s;
+    }
+    .news-item {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.3s;
+    }
+    .news-item:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    .news-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .news-description {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .news-link {
+      color: #4c51bf;
+      text-decoration: underline;
+    }
+    .dark body {
+      background: #1a202c;
+      color: #cbd5e0;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-r from-blue-400 to-indigo-600 min-h-screen p-6" aria-live="polite">
+  <div class="max-w-3xl mx-auto bg-white bg-opacity-20 backdrop-blur-md rounded-xl shadow-lg p-6">
+    <h1 class="text-white text-3xl font-semibold mb-6 text-center">Notícias sobre o Clima</h1>
+    <div id="newsContainer" class="space-y-4" role="region" aria-live="polite" aria-atomic="true">
+      <p>Carregando notícias...</p>
+    </div>
+    <button
+      id="backBtn"
+      class="mt-6 w-full bg-gray-800 hover:bg-gray-900 text-white py-2 rounded-md transition"
+      aria-label="Voltar para busca"
+    >
+      <i class="fas fa-arrow-left mr-2" aria-hidden="true"></i> Voltar
+    </button>
+  </div>
+
+  <script>
+    const newsContainer = document.getElementById('newsContainer');
+    const backBtn = document.getElementById('backBtn');
+
+    async function fetchWeatherNews() {
+      try {
+        // Using NewsAPI.org free endpoint for demonstration (requires API key)
+        // Since user wants free/public API without key, using a public RSS feed from NOAA
+        const proxyUrl = 'https://api.allorigins.win/get?url=';
+        const feedUrl = encodeURIComponent('https://www.noaa.gov/news-release/rss.xml');
+        const response = await fetch(proxyUrl + feedUrl);
+        if (!response.ok) {
+          throw new Error('Erro ao buscar notícias');
+        }
+        const data = await response.json();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+        const items = xmlDoc.querySelectorAll('item');
+        if (items.length === 0) {
+          newsContainer.innerHTML = '<p>Nenhuma notícia encontrada.</p>';
+          return;
+        }
+        newsContainer.innerHTML = '';
+        items.forEach((item, index) => {
+          if (index >= 10) return; // limit to 10 news items
+          const title = item.querySelector('title').textContent;
+          const description = item.querySelector('description').textContent;
+          const link = item.querySelector('link').textContent;
+          const newsItem = document.createElement('div');
+          newsItem.className = 'news-item';
+          newsItem.innerHTML = `
+            <h2 class="news-title">${title}</h2>
+            <p class="news-description">${description}</p>
+            <a href="${link}" target="_blank" rel="noopener noreferrer" class="news-link">Leia mais</a>
+          `;
+          newsContainer.appendChild(newsItem);
+        });
+      } catch (error) {
+        newsContainer.innerHTML = `<p class="text-red-300">${error.message}</p>`;
+      }
+    }
+
+    backBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    fetchWeatherNews();
+  </script>
+</body>
+</html>
