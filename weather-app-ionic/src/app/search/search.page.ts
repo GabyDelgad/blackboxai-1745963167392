@@ -17,4 +17,8 @@ export class SearchPage {
     }
     this.router.navigate(['/result'], { queryParams: { city: this.city.trim() } });
   }
+
+  goToNews() {
+    this.router.navigate(['/news']);
+  }
 }
