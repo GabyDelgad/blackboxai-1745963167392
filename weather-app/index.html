@@ -57,40 +57,36 @@
 <body class="bg-gradient-to-r from-blue-400 to-indigo-600 min-h-screen flex items-center justify-center p-4" aria-live="polite">
   <div class="bg-white bg-opacity-20 backdrop-blur-md rounded-xl shadow-lg max-w-md w-full p-6" role="main">
     <h1 class="text-white text-3xl font-semibold mb-6 text-center" id="appTitle">App de Clima</h1>
-    <form id="weatherForm" class="flex mb-4" aria-labelledby="appTitle">
-      <input
-        type="text"
-        id="cityInput"
-        placeholder="Digite o nome da cidade"
-        class="flex-grow rounded-l-md px-4 py-2 focus:outline-none"
-        required
-        aria-required="true"
-        aria-label="Nome da cidade"
-      />
-      <button
-        type="submit"
-        class="bg-indigo-700 hover:bg-indigo-800 text-white px-4 py-2 rounded-r-md transition"
-        aria-label="Buscar clima"
-      >
-        Buscar
-      </button>
-      <button
-        type="button"
-        id="clearBtn"
-        class="ml-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition"
-        aria-label="Limpar campo e resultados"
-      >
-        Limpar
-      </button>
+    <form id="weatherForm" class="flex flex-col mb-6" aria-labelledby="appTitle">
+      <label for="cityInput" class="mb-2 text-white font-semibold text-lg">Digite o nome da cidade para saber o clima:</label>
+      <div class="flex">
+        <input
+          type="text"
+          id="cityInput"
+          placeholder="Ex: São Paulo"
+          class="flex-grow rounded-l-md px-4 py-2 focus:outline-none"
+          required
+          aria-required="true"
+          aria-label="Nome da cidade"
+        />
+        <button
+          type="submit"
+          class="bg-indigo-700 hover:bg-indigo-800 text-white px-4 py-2 rounded-r-md transition"
+          aria-label="Buscar clima"
+        >
+          Buscar
+        </button>
+        <button
+          type="button"
+          id="clearBtn"
+          class="ml-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition"
+          aria-label="Limpar campo e resultados"
+        >
+          Limpar
+        </button>
+      </div>
     </form>
-    <button
-      id="geoBtn"
-      class="w-full mb-6 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md transition"
-      title="Buscar clima pela localização atual"
-      aria-label="Buscar clima pela localização atual"
-    >
-      <i class="fas fa-location-arrow mr-2" aria-hidden="true"></i> Usar localização atual
-    </button>
+    <!-- Removed geolocation button as per user request -->
     <button
       id="darkModeToggle"
       class="w-full mb-6 bg-gray-800 hover:bg-gray-900 text-white py-2 rounded-md transition"
@@ -99,137 +95,30 @@
     >
       <i class="fas fa-moon mr-2" aria-hidden="true"></i> Modo Escuro
     </button>
-    <div id="weatherResult" class="text-white text-center space-y-4 opacity-100" role="region" aria-live="polite" aria-atomic="true"></div>
+    <div id="weatherResult" class="text-white text-center space-y-4 opacity-100 mt-4" role="region" aria-live="polite" aria-atomic="true"></div>
   </div>
 
   <script>
-    // Replace 'YOUR_API_KEY_HERE' with your actual OpenWeatherMap API key
-    let apiKey = '';
-
-    // Prompt user to enter API key if not set
-    function promptApiKey() {
-      apiKey = prompt('Por favor, insira sua chave de API do OpenWeatherMap:', '');
-      if (!apiKey) {
-        alert('A chave de API é necessária para buscar o clima.');
-      }
-    }
-
-    promptApiKey();
-
     const weatherForm = document.getElementById('weatherForm');
     const cityInput = document.getElementById('cityInput');
-    const weatherResult = document.getElementById('weatherResult');
     const clearBtn = document.getElementById('clearBtn');
     const geoBtn = document.getElementById('geoBtn');
     const darkModeToggle = document.getElementById('darkModeToggle');
     const htmlElement = document.documentElement;
-    const bodyElement = document.body;
-
-    function displayLoading() {
-      weatherResult.style.opacity = 0;
-      setTimeout(() => {
-        weatherResult.innerHTML = '<div class="spinner"></div><p>Carregando...</p>';
-        weatherResult.style.opacity = 1;
-      }, 300);
-    }
-
-    function displayError(message) {
-      weatherResult.style.opacity = 0;
-      setTimeout(() => {
-        weatherResult.innerHTML = `<p class="text-red-300">${message}</p>`;
-        weatherResult.style.opacity = 1;
-      }, 300);
-    }
-
-    function displayWeather(data) {
-      const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
-      const sunrise = new Date(data.sys.sunrise * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      const sunset = new Date(data.sys.sunset * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-      weatherResult.style.opacity = 0;
-      setTimeout(() => {
-        weatherResult.innerHTML = `
-          <h2 class="text-2xl font-semibold">${data.name}, ${data.sys.country}</h2>
-          <img src="${iconUrl}" alt="${data.weather[0].description}" class="mx-auto" />
-          <p class="text-xl capitalize">${data.weather[0].description}</p>
-          <p class="text-4xl font-bold">${Math.round(data.main.temp)}&deg;C</p>
-          <p>Sensação térmica: ${Math.round(data.main.feels_like)}&deg;C</p>
-          <p>Humidade: ${data.main.humidity}%</p>
-          <p>Pressão: ${data.main.pressure} hPa</p>
-          <p>Vento: ${Math.round(data.wind.speed)} m/s</p>
-          <p>Nascer do sol: ${sunrise}</p>
-          <p>Pôr do sol: ${sunset}</p>
-        `;
-        weatherResult.style.opacity = 1;
-      }, 300);
-    }
-
-    async function fetchWeatherByCity(city) {
-      if (!apiKey) {
-        promptApiKey();
-        if (!apiKey) return;
-      }
-      displayLoading();
-      try {
-        const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=pt`
-        );
-        if (!response.ok) {
-          throw new Error('Cidade não encontrada');
-        }
-        const data = await response.json();
-        displayWeather(data);
-      } catch (error) {
-        displayError(error.message);
-      }
-    }
-
-    async function fetchWeatherByCoords(lat, lon) {
-      if (!apiKey) {
-        promptApiKey();
-        if (!apiKey) return;
-      }
-      displayLoading();
-      try {
-        const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt`
-        );
-        if (!response.ok) {
-          throw new Error('Não foi possível obter o clima para a localização');
-        }
-        const data = await response.json();
-        displayWeather(data);
-      } catch (error) {
-        displayError(error.message);
-      }
-    }
 
     weatherForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const city = cityInput.value.trim();
       if (!city) return;
-      fetchWeatherByCity(city);
+      // Redirect to weather-result.html with city as query parameter
+      window.location.href = `weather-result.html?city=${encodeURIComponent(city)}`;
     });
 
     clearBtn.addEventListener('click', () => {
       cityInput.value = '';
-      weatherResult.innerHTML = '';
     });
 
-    geoBtn.addEventListener('click', () => {
-      if (!navigator.geolocation) {
-        displayError('Geolocalização não é suportada pelo seu navegador.');
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          fetchWeatherByCoords(position.coords.latitude, position.coords.longitude);
-        },
-        () => {
-          displayError('Permissão para acessar localização negada.');
-        }
-      );
-    });
+    // Removed geolocation event listener as per user request
 
     // Dark mode toggle logic
     function setDarkMode(enabled) {
@@ -255,15 +144,6 @@
     if (localStorage.getItem('darkMode') === 'enabled') {
       setDarkMode(true);
     }
-
-    /*
-    Instruções para obter a chave de API do OpenWeatherMap:
-    1. Acesse https://openweathermap.org/api e crie uma conta gratuita.
-    2. Após o login, vá para a seção "API keys" no seu perfil.
-    3. Copie a chave de API gerada.
-    4. Ao usar o app, será solicitado que você insira essa chave para buscar o clima.
-    */
-
   </script>
 </body>
 </html>
