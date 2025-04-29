@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="primary">
     <ion-title>Buscar Clima</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -7,7 +7,8 @@
 <ion-content class="ion-padding">
   <ion-item>
     <ion-label position="floating">Nome da Cidade</ion-label>
-    <ion-input [(ngModel)]="city" type="text" autocomplete="off"></ion-input>
+    <ion-input [(ngModel)]="city" type="text" autocomplete="off" clearInput></ion-input>
   </ion-item>
   <ion-button expand="block" class="ion-margin-top" (click)="search()">Buscar</ion-button>
+  <ion-button expand="block" color="secondary" class="ion-margin-top" (click)="goToNews()">Notícias Recentes sobre o clima</ion-button>
 </ion-content>
