@@ -1,0 +1,23 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/search"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Notícias sobre o Clima</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+  <div *ngIf="errorMessage" class="ion-text-center ion-text-wrap ion-padding">
+    <p class="ion-text-color-danger">{{ errorMessage }}</p>
+  </div>
+  <ion-list *ngIf="newsItems.length > 0 && !loading">
+    <ion-item *ngFor="let item of newsItems" button detail href="{{item.link}}" target="_blank" rel="noopener noreferrer">
+      <ion-label>
+        <h2>{{ item.title }}</h2>
+        <p>{{ item.description }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
