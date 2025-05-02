@@ -1,0 +1,18 @@
+/* Custom styles for the news page */
+ion-content {
+  text-align: center;
+}
+
+ion-list {
+  margin-top: 1rem;
+}
+
+ion-item h2 {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+ion-item p {
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+}
