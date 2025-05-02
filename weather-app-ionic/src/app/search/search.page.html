@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Buscar Clima</ion-title>
+    <ion-title>App de Clima</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -9,6 +9,27 @@
     <ion-label position="floating">Nome da Cidade</ion-label>
     <ion-input [(ngModel)]="city" type="text" autocomplete="off" clearInput></ion-input>
   </ion-item>
-  <ion-button expand="block" class="ion-margin-top" (click)="search()">Buscar</ion-button>
-  <ion-button expand="block" color="secondary" class="ion-margin-top" (click)="goToNews()">Notícias Recentes sobre o clima</ion-button>
+  <ion-button expand="block" class="ion-margin-top" (click)="search()">Buscar Clima</ion-button>
+  <ion-button expand="block" color="secondary" class="ion-margin-top" (click)="showNews()">Notícias Recentes sobre o clima</ion-button>
+
+  <div *ngIf="weatherVisible" class="weather-result" aria-live="polite" role="region">
+    <h2>{{ locationName }}</h2>
+    <p>{{ weatherDescription }}</p>
+    <p>Temperatura: {{ temperature }} °C</p>
+    <p>Vento: {{ windSpeed }} km/h</p>
+    <p>Umidade relativa: {{ humidity }}%</p>
+    <p>Pressão atmosférica: {{ pressure }} hPa</p>
+  </div>
+
+  <div *ngIf="newsVisible" class="news-result" aria-live="polite" role="region">
+    <ion-list>
+      <ion-item *ngFor="let item of newsItems">
+        <ion-label>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.description }}</p>
+          <a [href]="item.link" target="_blank" rel="noopener noreferrer">Leia mais</a>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </div>
 </ion-content>
