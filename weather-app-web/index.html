@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>App de Clima</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(90deg, #3b82f6, #6366f1);
+      color: white;
+      margin: 0;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    input[type="text"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 0.375rem;
+      border: none;
+      width: 300px;
+      max-width: 90vw;
+      margin-bottom: 1rem;
+    }
+    button {
+      background-color: #4f46e5;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      color: white;
+      font-size: 1rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #4338ca;
+    }
+    #weatherResult, #newsResult {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      max-width: 400px;
+      width: 90vw;
+      margin-top: 1rem;
+      overflow-wrap: break-word;
+    }
+    .news-item {
+      margin-bottom: 1rem;
+    }
+    .news-item h3 {
+      margin: 0 0 0.25rem 0;
+    }
+    .news-item a {
+      color: #a5b4fc;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>App de Clima</h1>
+  <input type="text" id="cityInput" placeholder="Digite o nome da cidade" aria-label="Nome da cidade" />
+  <button id="searchBtn">Buscar Clima</button>
+  <button id="newsBtn">Notícias Recentes sobre o clima</button>
+
+  <div id="weatherResult" aria-live="polite" role="region"></div>
+  <div id="newsResult" aria-live="polite" role="region" style="display:none;"></div>
+
+  <script>
+    const cityInput = document.getElementById('cityInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const newsBtn = document.getElementById('newsBtn');
+    const weatherResult = document.getElementById('weatherResult');
+    const newsResult = document.getElementById('newsResult');
+
+    const weatherDescriptions = {
+      0: 'Céu limpo',
+      1: 'Principalmente limpo',
+      2: 'Parcialmente nublado',
+      3: 'Nublado',
+      45: 'Neblina',
+      48: 'Neblina com cristais de gelo',
+      51: 'Chuvisco leve',
+      53: 'Chuvisco moderado',
+      55: 'Chuvisco denso',
+      56: 'Chuvisco congelante leve',
+      57: 'Chuvisco congelante denso',
+      61: 'Chuva leve',
+      63: 'Chuva moderada',
+      65: 'Chuva forte',
+      66: 'Chuva congelante leve',
+      67: 'Chuva congelante forte',
+      71: 'Neve leve',
+      73: 'Neve moderada',
+      75: 'Neve forte',
+      77: 'Granizo',
+      80: 'Chuva de pancadas leve',
+      81: 'Chuva de pancadas moderada',
+      82: 'Chuva de pancadas forte',
+      85: 'Neve de pancadas leve',
+      86: 'Neve de pancadas forte',
+      95: 'Tempestade com trovoadas',
+      96: 'Tempestade com trovoadas e granizo leve',
+      99: 'Tempestade com trovoadas e granizo forte'
+    };
+
+    async function fetchCoordinates(city) {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Erro ao buscar coordenadas');
+      const data = await response.json();
+      if (data.length === 0) throw new Error('Cidade não encontrada');
+      return {
+        lat: data[0].lat,
+        lon: data[0].lon,
+        display_name: data[0].display_name
+      };
+    }
+
+    async function fetchWeather(lat, lon) {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m,pressure_msl&temperature_unit=celsius&windspeed_unit=kmh&timezone=auto`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Erro ao buscar dados do clima');
+      const data = await response.json();
+      if (!data.current_weather) throw new Error('Dados do clima indisponíveis');
+      return data.current_weather;
+    }
+
+    async function displayWeather(city) {
+      weatherResult.style.display = 'block';
+      newsResult.style.display = 'none';
+      weatherResult.innerHTML = '<p>Carregando...</p>';
+      try {
+        const coords = await fetchCoordinates(city);
+        const weather = await fetchWeather(coords.lat, coords.lon);
+        const description = weatherDescriptions[weather.weathercode] || 'Desconhecido';
+        weatherResult.innerHTML = `
+          <h2>${coords.display_name}</h2>
+          <p>${description}</p>
+          <p>Temperatura: ${weather.temperature} °C</p>
+          <p>Vento: ${weather.windspeed} km/h</p>
+          <p>Umidade relativa: ${weather.relativehumidity}%</p>
+          <p>Pressão atmosférica: ${weather.pressure} hPa</p>
+        `;
+      } catch (error) {
+        weatherResult.innerHTML = '<p style="color: #f87171;">' + error.message + '</p>';
+      }
+    }
+
+    async function displayNews() {
+      weatherResult.style.display = 'none';
+      newsResult.style.display = 'block';
+      newsResult.innerHTML = '<p>Carregando notícias...</p>';
+      try {
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+        const feedUrl = encodeURIComponent('https://www.noaa.gov/news-release/rss.xml');
+        const response = await fetch(proxyUrl + feedUrl);
+        if (!response.ok) throw new Error('Erro ao buscar notícias');
+        const text = await response.text();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(text, "text/xml");
+        const items = xmlDoc.querySelectorAll('item');
+        if (items.length === 0) {
+          newsResult.innerHTML = '<p>Nenhuma notícia encontrada.</p>';
+          return;
+        }
+        let html = '';
+        items.forEach((item, index) => {
+          if (index >= 10) return;
+          const title = item.querySelector('title')?.textContent || '';
+          const description = item.querySelector('description')?.textContent || '';
+          const link = item.querySelector('link')?.textContent || '#';
+          html += `
+            <div class="news-item">
+              <h3>${title}</h3>
+              <p>${description}</p>
+              <a href="${link}" target="_blank" rel="noopener noreferrer">Leia mais</a>
+            </div>
+          `;
+        });
+        newsResult.innerHTML = html;
+      } catch (error) {
+        newsResult.innerHTML = '<p style="color: #f87171;">' + error.message + '</p>';
+      }
+    }
+
+    searchBtn.addEventListener('click', () => {
+      const city = cityInput.value.trim();
+      if (city) {
+        displayWeather(city);
+      }
+    });
+
+    newsBtn.addEventListener('click', () => {
+      displayNews();
+    });
+  </script>
+</body>
+</html>
