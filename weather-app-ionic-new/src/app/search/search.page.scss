@@ -1,0 +1,24 @@
+/* Custom styles for the search page */
+.weather-result, .news-result {
+  margin-top: 1rem;
+}
+
+.weather-result h2 {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.news-result ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+}
+
+.news-result ion-label h3 {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.news-result ion-label p {
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+}
