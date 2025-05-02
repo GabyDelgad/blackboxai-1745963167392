@@ -1,0 +1,23 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/search"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Resultado do Clima</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+  <div *ngIf="errorMessage" class="ion-text-center ion-text-wrap ion-padding">
+    <p class="ion-text-color-danger">{{ errorMessage }}</p>
+  </div>
+  <div *ngIf="weather && !loading">
+    <h2>{{ city }}</h2>
+    <p>{{ weather.weathercode_description }}</p>
+    <p><strong>Temperatura:</strong> {{ weather.temperature }} °C</p>
+    <p><strong>Vento:</strong> {{ weather.windspeed }} km/h</p>
+    <p><strong>Umidade relativa:</strong> {{ weather.relativehumidity }}%</p>
+    <p><strong>Pressão atmosférica:</strong> {{ weather.pressure }} hPa</p>
+  </div>
+</ion-content>
